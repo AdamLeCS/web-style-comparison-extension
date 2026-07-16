@@ -1,0 +1,25 @@
+{
+  "name": "website_style_extension",
+  "version": "1.0.0",
+  "description": "Live server",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AdamLeCS/web-style-comparison-extension.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/AdamLeCS/web-style-comparison-extension/issues"
+  },
+  "homepage": "https://github.com/AdamLeCS/web-style-comparison-extension#readme",
+  "dependencies": {
+    "ws": "^8.21.1"
+  }
+}
