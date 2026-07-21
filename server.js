@@ -25,10 +25,10 @@ const server = http.createServer((req, res) => {
     });
 
 });
+// makeEditorFile('./public/test.css', './public/copy.css');
+// server.listen(3000);
 
-server.listen(3000);
-
-startWatcher();
+// startWatcher();
 
 
 function getFilePath(url) {
@@ -57,4 +57,14 @@ function getMimeType(filePath) {
     }
     return MIMES[extension];
     
+}
+
+function makeEditorFile(fileToCopy, copyName) {
+    fs.copyFile(fileToCopy, copyName, (err) => {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        console.log('file copied');
+    });
 }
