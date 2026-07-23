@@ -3,30 +3,43 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { startWatcher } from './watcher.js'
 
+const script = '<script src="inject-script.js" id="inject-script"></script>';
+
 const server = http.createServer((req, res) => {
     const url = req.url;
-    const filePath = (url === '/' ? "./public/index.html" : "./public/" + url);
+    let filePath;
+    // routing
+    if (url === '/') {
+        filePath = "./public/index.html";
+    } else if (url === '/inject-script.js') {
+        filePath = "./inject-script.js";
+    } else {
+        filePath = "./public/" + url;
+    }
 
     // first, determine what kind of file type is being requested
     const fileType = getMimeType(filePath);
-    let fileExists = true;
 
     fs.readFile(filePath, (err, data) => {
         if (err) {
-            console.log("Error occured: ", err);
+            // console.log("Error occured: ", err);
             res.writeHead(404);
             res.end("404 not found");
-            fileExists = false;
             return;
         }
         // successful file read, create correct headers and return file data
         res.writeHead(200, fileType);
+
+        // inject script if html
+        if (fileType === 'text/html') {
+            data = data.toString().replace("</body>", `${script}</body>`);
+        }
         res.end(data);
     });
 
 });
 // makeEditorFile('./public/test.css', './public/copy.css');
-// server.listen(3000);
+server.listen(3000);
 
 // startWatcher();
 
