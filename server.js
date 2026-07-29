@@ -2,6 +2,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { startWatcher } from './watcher.js'
+import express from 'express';
 
 const script = '<script src="inject-script.js" id="inject-script"></script>';
 const mainHtmlPath = "./public/index.html";
@@ -42,9 +43,6 @@ const server = http.createServer((req, res) => {
 
 server.listen(3000);
 
-// make copies of all stylesheet files in main html file
-await createCSSCopies(mainHtmlPath);
-
 // startWatcher();
 
 
@@ -76,6 +74,25 @@ function getMimeType(filePath) {
     
 }
 
+// create a backend app using express for frontend and backend connections
+
+const app = express();
+app.use(express.json());
+app.use(express.static("public"));
+
+app.post("/create-css-copy", async (req, res) => {
+    try {
+        // get the file names as a js object after copying files
+        const result = await createCSSCopies(req.body.htmlFilePath);
+        res.json(result); // send the js object as json response
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            error: "Failed to copy css files"
+        });
+    }
+});
+
 async function createCSSCopies(htmlFilePath) {
     // read the file into a variable
     const mainHtmlFile = await fs.promises.readFile(htmlFilePath, "utf8");
@@ -94,4 +111,10 @@ async function createCSSCopies(htmlFilePath) {
 
     // create new file
     await fs.promises.copyFile(cssFilePath, cssCopyFileName);
+
+    return {
+        original: `${baseName}${extension}`,
+        copy: cssCopyFileName
+    }
 }
+

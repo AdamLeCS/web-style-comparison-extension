@@ -22,12 +22,26 @@ const thisScript = document.getElementById("inject-script");
 thisScript.after(styleInfo);
 
 // get names of original and copy stylesheets
-const cssFile = document.querySelector('link[rel="stylesheet"]');
+const cssFileNames = await fetch("/create-css-copy", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        htmlFilePath: "index.html"
+    })
+});
+window.alert(cssFileNames);
+
+// get link element
+const linkElement = document.querySelector("link");
 
 document.addEventListener("keydown", (event) => {
   if (event.key === "ArrowRight") {
     styleInfo.textContent = "copy";
+    linkElement.href = cssFileNames.copy;
   } else if (event.key === "ArrowLeft") {
     styleInfo.textContent = "original";
+    linkElement.href = cssFileNames.original;
   }
 });
