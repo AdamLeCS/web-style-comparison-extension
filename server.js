@@ -4,6 +4,7 @@ import path from 'node:path';
 import { startWatcher } from './watcher.js'
 
 const script = '<script src="inject-script.js" id="inject-script"></script>';
+const mainHtmlPath = "./public/index.html";
 
 const server = http.createServer((req, res) => {
     const url = req.url;
@@ -12,7 +13,7 @@ const server = http.createServer((req, res) => {
     if (url === '/') {
         filePath = "./public/index.html";
     } else if (url === '/inject-script.js') {
-        filePath = "./inject-script.js";
+        filePath = url;
     } else {
         filePath = "./public/" + url;
     }
@@ -38,8 +39,11 @@ const server = http.createServer((req, res) => {
     });
 
 });
-// makeEditorFile('./public/test.css', './public/copy.css');
+
 server.listen(3000);
+
+// make copies of all stylesheet files in main html file
+await createCSSCopies(mainHtmlPath);
 
 // startWatcher();
 
@@ -72,12 +76,22 @@ function getMimeType(filePath) {
     
 }
 
-function makeEditorFile(fileToCopy, copyName) {
-    fs.copyFile(fileToCopy, copyName, (err) => {
-        if (err) {
-            console.log(err);
-            return;
-        }
-        console.log('file copied');
-    });
+async function createCSSCopies(htmlFilePath) {
+    // read the file into a variable
+    const mainHtmlFile = await fs.promises.readFile(htmlFilePath, "utf8");
+    
+    // use a regex to get the css relative file path from the html file
+    const cssRelativePath = mainHtmlFile.match(/href="([^"']+)"/);
+
+    // with that, you can comebine the path of the html file directory with the relative css path
+    // to get the path to the css file
+    const cssFilePath = path.resolve(path.dirname(htmlFilePath), cssRelativePath[1]);
+    
+    // create the name of the copied file
+    const extension = path.extname(cssFilePath);
+    const baseName = path.basename(cssFilePath, extension);
+    const cssCopyFileName = (`./public/${baseName}2${extension}`);
+
+    // create new file
+    await fs.promises.copyFile(cssFilePath, cssCopyFileName);
 }
