@@ -22,16 +22,22 @@ const thisScript = document.getElementById("inject-script");
 thisScript.after(styleInfo);
 
 // get names of original and copy stylesheets
-const cssFileNames = await fetch("/create-css-copy", {
+let cssFileNames;
+async function createCopies() {
+  cssFileNames = await fetch("/create-css-copy", {
     method: "POST",
     headers: {
-        "Content-Type": "application/json"
+      "Content-Type": "application/json"
     },
     body: JSON.stringify({
-        htmlFilePath: "index.html"
+      htmlFilePath: "index.html"
     })
-});
-window.alert(cssFileNames);
+  });
+  cssFileNames = await cssFileNames.json();
+  window.alert(cssFileNames);
+}
+
+createCopies();
 
 // get link element
 const linkElement = document.querySelector("link");

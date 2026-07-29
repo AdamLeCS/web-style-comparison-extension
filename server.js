@@ -14,7 +14,7 @@ const server = http.createServer((req, res) => {
     if (url === '/') {
         filePath = "./public/index.html";
     } else if (url === '/inject-script.js') {
-        filePath = url;
+        filePath = './inject-script.js';
     } else {
         filePath = "./public/" + url;
     }
