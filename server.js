@@ -15,6 +15,22 @@ const server = http.createServer((req, res) => {
         filePath = "./public/index.html";
     } else if (url === '/inject-script.js') {
         filePath = './inject-script.js';
+    } else if (url === '/create-css-copy' && req.method === 'POST') {
+        // handle frontend requests here
+        // these req methods are like event listeners, just waiting for data to come or the end signal to be sent
+        let body = "";
+        req.on('data', chunk => { // req.on data is for getting the input chunk by chunk
+            body += chunk;
+        });
+        req.on('end', async () => { // runs when the data stream has completed
+            const data = JSON.parse(body);
+            const responseData = await createCSSCopies(data.htmlFilePath);
+            console.log(responseData);
+            res.writeHead(200);
+
+            res.end(JSON.stringify(responseData));
+        });
+        return;
     } else {
         filePath = "./public/" + url;
     }
@@ -76,6 +92,7 @@ function getMimeType(filePath) {
 
 // create a backend app using express for frontend and backend connections
 
+/*
 const app = express();
 app.use(express.json());
 app.use(express.static("public"));
@@ -91,7 +108,7 @@ app.post("/create-css-copy", async (req, res) => {
             error: "Failed to copy css files"
         });
     }
-});
+}); */
 
 async function createCSSCopies(htmlFilePath) {
     // read the file into a variable
@@ -107,13 +124,14 @@ async function createCSSCopies(htmlFilePath) {
     // create the name of the copied file
     const extension = path.extname(cssFilePath);
     const baseName = path.basename(cssFilePath, extension);
-    const cssCopyFileName = (`./public/${baseName}2${extension}`);
+    const cssOriginalFileName = `${baseName}${extension}`;
+    const cssCopyFileName = `${baseName}2${extension}`;
 
     // create new file
     await fs.promises.copyFile(cssFilePath, cssCopyFileName);
 
     return {
-        original: `${baseName}${extension}`,
+        original: cssOriginalFileName,
         copy: cssCopyFileName
     }
 }

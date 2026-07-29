@@ -30,11 +30,10 @@ async function createCopies() {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      htmlFilePath: "index.html"
+      htmlFilePath: "public/index.html"
     })
   });
   cssFileNames = await cssFileNames.json();
-  window.alert(cssFileNames);
 }
 
 createCopies();
