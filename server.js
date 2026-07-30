@@ -2,7 +2,6 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { startWatcher } from './watcher.js'
-import express from 'express';
 
 const script = '<script src="inject-script.js" id="inject-script"></script>';
 const mainHtmlPath = "./public/index.html";
@@ -25,7 +24,6 @@ const server = http.createServer((req, res) => {
         req.on('end', async () => { // runs when the data stream has completed
             const data = JSON.parse(body);
             const responseData = await createCSSCopies(data.htmlFilePath);
-            console.log(responseData);
             res.writeHead(200);
 
             res.end(JSON.stringify(responseData));
@@ -59,7 +57,7 @@ const server = http.createServer((req, res) => {
 
 server.listen(3000);
 
-// startWatcher();
+startWatcher();
 
 
 function getFilePath(url) {
@@ -90,26 +88,6 @@ function getMimeType(filePath) {
     
 }
 
-// create a backend app using express for frontend and backend connections
-
-/*
-const app = express();
-app.use(express.json());
-app.use(express.static("public"));
-
-app.post("/create-css-copy", async (req, res) => {
-    try {
-        // get the file names as a js object after copying files
-        const result = await createCSSCopies(req.body.htmlFilePath);
-        res.json(result); // send the js object as json response
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            error: "Failed to copy css files"
-        });
-    }
-}); */
-
 async function createCSSCopies(htmlFilePath) {
     // read the file into a variable
     const mainHtmlFile = await fs.promises.readFile(htmlFilePath, "utf8");
@@ -117,18 +95,20 @@ async function createCSSCopies(htmlFilePath) {
     // use a regex to get the css relative file path from the html file
     const cssRelativePath = mainHtmlFile.match(/href="([^"']+)"/);
 
-    // with that, you can comebine the path of the html file directory with the relative css path
+    // with that, you can combine the path of the html file directory with the relative css path
     // to get the path to the css file
     const cssFilePath = path.resolve(path.dirname(htmlFilePath), cssRelativePath[1]);
     
-    // create the name of the copied file
+    // names of original and copy file to send to frontend
     const extension = path.extname(cssFilePath);
     const baseName = path.basename(cssFilePath, extension);
     const cssOriginalFileName = `${baseName}${extension}`;
-    const cssCopyFileName = `${baseName}2${extension}`;
+    const cssCopyFileName = `${baseName}_copy${extension}`;
 
-    // create new file
-    await fs.promises.copyFile(cssFilePath, cssCopyFileName);
+    const cssFileCopyPath = path.resolve(path.dirname(htmlFilePath), cssCopyFileName);
+
+    // create new file using the absolute paths of the css file and its copy
+    await fs.promises.copyFile(cssFilePath, cssFileCopyPath);
 
     return {
         original: cssOriginalFileName,
