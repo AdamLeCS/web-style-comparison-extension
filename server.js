@@ -1,7 +1,8 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
-import { startWatcher } from './watcher.js'
+import { startWatcher } from './watcher.js';
+import { createWebSocketServer } from "./websocket.js";
 
 const script = '<script src="inject-script.js" id="inject-script"></script>';
 const mainHtmlPath = "./public/index.html";
@@ -55,8 +56,8 @@ const server = http.createServer((req, res) => {
 
 });
 
+const wss = createWebSocketServer(server);
 server.listen(3000);
-
 startWatcher();
 
 
@@ -108,7 +109,9 @@ async function createCSSCopies(htmlFilePath) {
     const cssFileCopyPath = path.resolve(path.dirname(htmlFilePath), cssCopyFileName);
 
     // create new file using the absolute paths of the css file and its copy
-    await fs.promises.copyFile(cssFilePath, cssFileCopyPath);
+    if (!fs.existsSync(cssFileCopyPath)) {
+        await fs.promises.copyFile(cssFilePath, cssFileCopyPath);
+    }
 
     return {
         original: cssOriginalFileName,

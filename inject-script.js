@@ -1,5 +1,5 @@
 // this script is meant to be injected into the opened html file when the server starts
-// it handles reloading the server, switching between stylesheets
+// it handles reloading the server, switching between stylesheets, and some ui
 
 // add the box in the top right corner
 const styleInfo = document.createElement("p");
@@ -49,4 +49,15 @@ document.addEventListener("keydown", (event) => {
     styleInfo.textContent = "original";
     linkElement.href = cssFileNames.original;
   }
+});
+
+
+
+// web socket server stuff underneath
+const socket = new WebSocket('ws://localhost:3000');
+// this event listener will run every time a broadcast is made from backend
+socket.addEventListener("message", (event) => {
+  const currHref = linkElement.href;
+  linkElement.href = "";
+  linkElement.href = currHref;
 });
